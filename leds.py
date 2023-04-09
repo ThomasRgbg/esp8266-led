@@ -61,7 +61,7 @@ class LedGlobe46:
             i , j = self.order_upper[x-12]
         else:
             i , j = self.order_lower[x]
-        print("i = {0}, j={1}".format(i,j))
+        # print("i = {0}, j={1}".format(i,j))
         self.np[i][j] = val
         self.write()
         
@@ -75,24 +75,58 @@ class LedGlobe46:
                 self.np[i][j] = (0,0,0)
             self.np[i].write()
 
+    # Animations
+    def rotate_on(self, color):
+        for x in range(len(self)):
+            self[x] = color
+            sleep(0.1)
+
+    def rotate(self, color):
+        self.all_on(black)
+        for x in range(len(self)):
+            self[x] = color
+            if x > 0: 
+                self[x-1] = black
+            sleep(0.1)
+        self.all_on(black)
+
+    def all_on(self, color):
+        for x in range(len(self)):
+            self[x] = color
 
     def test_lower(self):
         while True:
-            for x in range(len(self)):
-                self[x] = white
-                sleep(0.1)
-            for x in range(len(self)):
-                self[x] = red
-                sleep(0.1)
-            for x in range(len(self)):
-                self[x] = green
-                sleep(0.1)
-            for x in range(len(self)):
-                self[x] = blue
-                sleep(0.1)
-            for x in range(len(self)):
-                self[x] = black
-                sleep(0.1)
+            self.rotate(red)
+            self.rotate(red)
+            self.rotate(green)
+            self.rotate(green)
+            self.rotate(blue)
+            self.rotate(blue)
+            self.rotate(yellow)
+            self.rotate(yellow)
+            self.rotate(pink)
+            self.rotate(pink)
+            self.all_on(black)
+            self.rotate_on(red)
+            self.rotate_on(green)
+            self.rotate_on(blue)
+            self.rotate_on(yellow)
+            self.rotate_on(pink)
+            self.all_on(black)
+            
+    def test_rotate_all(self):
+        while True:
+            self.all_on(black)
+            self.rotate_on(red)
+            self.rotate_on(blue)
+            self.rotate_on(yellow)
+            self.rotate_on(pink)
+            self.rotate_on(green)
+            self.rotate_on(blue)
+            self.rotate_on(pink)
+            
+    def test(self):
+        self.test_rotate_all()
 
 
 class LedStrip4:

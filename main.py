@@ -96,7 +96,7 @@ async def housekeeping():
 
 async def ledrun():
     while True:
-        ledcube.test_lower()
+        ledcube.test()
         await uasyncio.sleep_ms(1000)
 
 
