@@ -9,6 +9,10 @@ import micropython
 
 from leds import *
 
+from gurgleapps_webserver import GurgleAppsWebserver
+import ujson as json
+
+
 #####
 # Schematic/Notes
 ######
@@ -19,17 +23,19 @@ from leds import *
 # GPIO15 = Chan 4
 
 #####
-# LEDs
+# Housekeeping
 #####
 
-# time.sleep(5)
+count = 1
+errcount = 0
 
-#l1 = LedStrip4(12)
-#l2 = LedStrip4(13)
-#l3 = LedStrip4(14)
-#l4 = LedStrip4(15)
+def get_count():
+    global count
+    return count
 
-ledcube = LedGlobe46(12,13,14,15)
+def get_errcount():
+    global errcount
+    return errcount
 
 #####
 # Watchdog
@@ -58,19 +64,53 @@ class Watchdog:
 # wdt.feed()
 
 #####
-# Housekeeping
+# LEDs
 #####
 
-count = 1
-errcount = 0
+# time.sleep(5)
 
-def get_count():
-    global count
-    return count
+#l1 = LedStrip4(12)
+#l2 = LedStrip4(13)
+#l3 = LedStrip4(14)
+#l4 = LedStrip4(15)
 
-def get_errcount():
-    global errcount
-    return errcount
+ledcube = LedGlobe46(12,13,14,15)
+#ledcube.blank()
+
+led_running = True
+
+#####
+# Webserver 
+#####
+
+server = GurgleAppsWebserver(port=80, doc_root="/www", log_level=2)
+
+#####
+# Webserver Callbacks
+#####
+
+status = True
+
+async def send_status(request, response):
+    response_string = json.dumps({"status":status, "count":count, "errcount":errcount, "led_running":led_running})
+    await response.send_json(response_string, 200)
+
+async def led_start(request, response):
+    global led_running
+    led_running = True
+    await send_status(request, response)
+
+async def led_stop(request, response):
+    global led_running
+    led_running = False
+    await send_status(request, response)
+
+
+server.add_function_route("/status", send_status)
+server.add_function_route("/reset", reset)
+server.add_function_route("/start", led_start)
+server.add_function_route("/stop", led_stop)
+
 
 #####
 # Task definition
@@ -79,8 +119,9 @@ def get_errcount():
 async def housekeeping():
     global errcount
     global count
+    await uasyncio.sleep_ms(1000)
+
     while True:
-        await uasyncio.sleep_ms(60000)
         print("housekeeping() - count {0}, errcount {1}".format(count,errcount))
         # wdt.feed()
         gc.collect()
@@ -91,12 +132,17 @@ async def housekeeping():
             reset()
 
         count += 1
+        await uasyncio.sleep_ms(60000)
 
 
 
 async def ledrun():
+    global led_running
     while True:
-        ledcube.test()
+        if led_running:
+            await ledcube.test()
+        else:
+            await ledcube.blank()
         await uasyncio.sleep_ms(1000)
 
 
@@ -104,9 +150,13 @@ async def ledrun():
 # Main
 ####
 
+print("main_loop")
+ledcube.all_on(green)
 
 main_loop = uasyncio.get_event_loop()
 
+
+main_loop.create_task(uasyncio.start_server(server.serve_request, "0.0.0.0", 80))
 main_loop.create_task(housekeeping())
 main_loop.create_task(ledrun())
 

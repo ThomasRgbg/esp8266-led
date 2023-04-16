@@ -61,7 +61,7 @@ class LedGlobe46:
             i , j = self.order_upper[x-12]
         else:
             i , j = self.order_lower[x]
-        # print("i = {0}, j={1}".format(i,j))
+        # print("i = {0}, j={1}, val={2}".format(i,j,val))
         self.np[i][j] = val
         self.write()
         
@@ -69,36 +69,38 @@ class LedGlobe46:
         for i in range(len(self.np)):
             self.np[i].write()
             
-    def blank(self):
+    async def blank(self):
         for i in range(len(self.np)):
             for j in range(len(self.np[0])):
                 self.np[i][j] = (0,0,0)
             self.np[i].write()
 
     # Animations
-    def rotate_on(self, color):
+    async def rotate_on(self, color):
+        print("rotate_on: {0}".format(color))
         for x in range(len(self)):
             self[x] = color
-            sleep(0.1)
+            await uasyncio.sleep_ms(50)
 
-    def rotate(self, color):
+    async def rotate(self, color):
         self.all_on(black)
         for x in range(len(self)):
             self[x] = color
             if x > 0: 
                 self[x-1] = black
-            sleep(0.1)
+            await uasyncio.sleep_ms(50)
         self.all_on(black)
 
-    def all_on(self, color):
+    async def all_on(self, color):
+        print("all_on: {0}".format(color))
         for x in range(len(self)):
             self[x] = color
 
-    def test_lower(self):
+    async def test_lower(self):
         while True:
-            self.rotate(red)
-            self.rotate(red)
-            self.rotate(green)
+            await self.rotate(red)
+            await self.rotate(red)
+            await self.rotate(green)
             self.rotate(green)
             self.rotate(blue)
             self.rotate(blue)
@@ -114,19 +116,19 @@ class LedGlobe46:
             self.rotate_on(pink)
             self.all_on(black)
             
-    def test_rotate_all(self):
-        while True:
-            self.all_on(black)
-            self.rotate_on(red)
-            self.rotate_on(blue)
-            self.rotate_on(yellow)
-            self.rotate_on(pink)
-            self.rotate_on(green)
-            self.rotate_on(blue)
-            self.rotate_on(pink)
+    async def test_rotate_all(self):
+        #while True:
+        await self.rotate_on(red)
+        await self.rotate_on(blue)
+        await self.rotate_on(yellow)
+        await self.rotate_on(pink)
+        await self.rotate_on(green)
+        await self.rotate_on(blue)
+        await self.rotate_on(pink)
+        await self.all_on(black)
             
-    def test(self):
-        self.test_rotate_all()
+    async def test(self):
+        await self.test_rotate_all()
 
 
 class LedStrip4:
