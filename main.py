@@ -92,7 +92,11 @@ server = GurgleAppsWebserver(port=80, doc_root="/www", log_level=2)
 status = True
 
 async def send_status(request, response):
-    response_string = json.dumps({"status":status, "count":count, "errcount":errcount, "led_running":led_running})
+    response_string = json.dumps({"status":status, "count":count,
+                                  "errcount":errcount, "led_running":led_running,
+                                  "animation_delay":ledcube.animation_delay,
+                                  "led_mode":ledcube.mode,
+                                  })
     await response.send_json(response_string, 200)
 
 async def led_start(request, response):
@@ -105,11 +109,30 @@ async def led_stop(request, response):
     led_running = False
     await send_status(request, response)
 
+async def led_faster(request, response):
+    ledcube.faster()
+    await send_status(request, response)
+
+async def led_slower(request, response):
+    ledcube.slower()
+    await send_status(request, response)
+
+#async def led_mode_rotate_left(request, response):
+    #ledcube.mode = rotate_left
+    #await send_status(request, response)
+
+#async def led_mode_fade(request, response):
+    #ledcube.mode = fade
+    #await send_status(request, response)
 
 server.add_function_route("/status", send_status)
 server.add_function_route("/reset", reset)
 server.add_function_route("/start", led_start)
 server.add_function_route("/stop", led_stop)
+server.add_function_route("/faster", led_faster)
+server.add_function_route("/slower", led_slower)
+#server.add_function_route("/rotate_left", rotate_left)
+#server.add_function_route("/fade", fade)
 
 
 #####
@@ -143,7 +166,7 @@ async def ledrun():
             await ledcube.test()
         else:
             await ledcube.blank()
-        await uasyncio.sleep_ms(1000)
+        await uasyncio.sleep_ms(10)
 
 
 ####

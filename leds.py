@@ -22,6 +22,13 @@ green = (0,0,255)
 pink  = (64,128,0)
 yellow = (255,0,150)
 black = (0,0,0)
+all = (1024,1024,1024)
+
+all_on = 0
+rotate_left = 1
+rotate_right = 2
+blink = 2
+fade = 3
 
 
 class LedGlobe46:
@@ -43,6 +50,10 @@ class LedGlobe46:
                             (2,0), (2,3), (2,4),
                             (3,5), (3,2), (3,1), 
                             ]
+
+
+        self.animation_delay = 64
+        self.mode = fade
 
         self.blank()
 
@@ -80,7 +91,7 @@ class LedGlobe46:
         print("rotate_on: {0}".format(color))
         for x in range(len(self)):
             self[x] = color
-            await uasyncio.sleep_ms(50)
+            await uasyncio.sleep_ms(self.animation_delay)
 
     async def rotate(self, color):
         self.all_on(black)
@@ -88,7 +99,7 @@ class LedGlobe46:
             self[x] = color
             if x > 0: 
                 self[x-1] = black
-            await uasyncio.sleep_ms(50)
+            await uasyncio.sleep_ms(self.animation_delay)
         self.all_on(black)
 
     async def all_on(self, color):
@@ -96,25 +107,36 @@ class LedGlobe46:
         for x in range(len(self)):
             self[x] = color
 
-    async def test_lower(self):
-        while True:
-            await self.rotate(red)
-            await self.rotate(red)
-            await self.rotate(green)
-            self.rotate(green)
-            self.rotate(blue)
-            self.rotate(blue)
-            self.rotate(yellow)
-            self.rotate(yellow)
-            self.rotate(pink)
-            self.rotate(pink)
-            self.all_on(black)
-            self.rotate_on(red)
-            self.rotate_on(green)
-            self.rotate_on(blue)
-            self.rotate_on(yellow)
-            self.rotate_on(pink)
-            self.all_on(black)
+    async def fade_on(self, color):
+        print("fade_on: {0}".format(color))
+        for x in range(0, 100, 4):
+            color_faded = [int(i * x * 0.01) for i in color]
+            await self.all_on(color_faded)
+            await uasyncio.sleep_ms(self.animation_delay)
+        for x in range(100, 0, -4):
+            color_faded = [int(i * x * 0.01) for i in color]
+            await self.all_on(color_faded)
+            await uasyncio.sleep_ms(self.animation_delay)
+
+    #async def test_lower(self):
+        #while True:
+            #await self.rotate(red)
+            #await self.rotate(red)
+            #await self.rotate(green)
+            #self.rotate(green)
+            #self.rotate(blue)
+            #self.rotate(blue)
+            #self.rotate(yellow)
+            #self.rotate(yellow)
+            #self.rotate(pink)
+            #self.rotate(pink)
+            #self.all_on(black)
+            #self.rotate_on(red)
+            #self.rotate_on(green)
+            #self.rotate_on(blue)
+            #self.rotate_on(yellow)
+            #self.rotate_on(pink)
+            #self.all_on(black)
             
     async def test_rotate_all(self):
         #while True:
@@ -125,10 +147,42 @@ class LedGlobe46:
         await self.rotate_on(green)
         await self.rotate_on(blue)
         await self.rotate_on(pink)
-        await self.all_on(black)
+        # await self.all_on(black)
+
+
+    async def test_fade_all(self):
+        await self.fade_on(red)
+        await self.fade_on(blue)
+        await self.fade_on(yellow)
+        await self.fade_on(pink)
+        await self.fade_on(green)
+        await self.fade_on(blue)
+        await self.fade_on(pink)
+
+# external API
+
+    def faster(self):
+        if self.animation_delay >= 2:
+            self.animation_delay = int(self.animation_delay / 2)
+        else:
+            self.animation_delay = 2
             
+    def slower(self):
+        if self.animation_delay >= 2:
+            self.animation_delay = int(self.animation_delay * 2)
+        else:
+            self.animation_delay = 2
+
     async def test(self):
-        await self.test_rotate_all()
+        if self.mode == all_on:
+            await self.all_on(red)
+        elif self.mode == rotate_left:
+            await self.test_rotate_all()
+        elif self.mode == fade:
+            await self.test_fade_all()
+#        elif self.mode = blink:
+#            await self.test_blink_all()
+        
 
 
 class LedStrip4:
