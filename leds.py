@@ -31,6 +31,8 @@ blink = 2
 fade = 3
 
 
+
+
 class LedGlobe46:
     def __init__(self, gpioA, gpioB, gpioC, gpioD):
         self.np = []
@@ -117,26 +119,6 @@ class LedGlobe46:
             color_faded = [int(i * x * 0.01) for i in color]
             await self.all_on(color_faded)
             await uasyncio.sleep_ms(self.animation_delay)
-
-    #async def test_lower(self):
-        #while True:
-            #await self.rotate(red)
-            #await self.rotate(red)
-            #await self.rotate(green)
-            #self.rotate(green)
-            #self.rotate(blue)
-            #self.rotate(blue)
-            #self.rotate(yellow)
-            #self.rotate(yellow)
-            #self.rotate(pink)
-            #self.rotate(pink)
-            #self.all_on(black)
-            #self.rotate_on(red)
-            #self.rotate_on(green)
-            #self.rotate_on(blue)
-            #self.rotate_on(yellow)
-            #self.rotate_on(pink)
-            #self.all_on(black)
             
     async def test_rotate_all(self):
         #while True:
@@ -183,87 +165,12 @@ class LedGlobe46:
 #        elif self.mode = blink:
 #            await self.test_blink_all()
         
-
-
-class LedStrip4:
-    def __init__(self, gpionum):
-        self.pin=Pin(gpionum, Pin.OUT)
-        self.np = NeoPixel(self.pin, 8)
-
-    @property
-    def np1l(self):
-        return self.np[0]
-    
-    @np1l.setter
-    def np1l(self, rgb):
-        self.np[0] = rgb
-        self.np.write()
-
-    @property
-    def np1h(self):
-        return self.np[1]
-
-    @np1h.setter
-    def np1h(self, rgb):
-        self.np[1] = rgb
-        self.np.write()
-        
-    @property
-    def np2l(self):
-        return self.np[3]
-    
-    @np2l.setter
-    def np2l(self, rgb):
-        self.np[3] = rgb
-        self.np.write()
-
-    @property
-    def np2h(self):
-        return self.np[2]
-
-    @np2h.setter
-    def np2h(self, rgb):
-        self.np[2] = rgb
-        self.np.write()
-
-    @property
-    def np3l(self):
-        return self.np[4]
-    
-    @np3l.setter
-    def np3l(self, rgb):
-        self.np[4] = rgb
-        self.np.write()
-
-    @property
-    def np3h(self):
-        return self.np[5]
-
-    @np3h.setter
-    def np3h(self, rgb):
-        self.np[5] = rgb
-        self.np.write()
-        
-    def test(self, color):
-        self.np3l = color
-        for i in range(5):
-            temp = self.np3h
-            self.np3h = self.np2h
-            self.np2h = self.np1h
-            self.np1h = self.np1l
-            self.np1l = self.np2l
-            self.np2l = self.np3l
-            self.np3l = temp
-            # await uasyncio.sleep_ms(400)
-            sleep(0.25)
-
-    def testrun(self):
-        self.test(white)
-        self.test(green)
-        self.test(red)
-        self.test(blue)
-        self.test(yellow)
-        self.test(pink)
+#    async def interprete(self, commands):
+#commands='1a2b3c4d'
+#>>> for x in range(int(len(commands)/2)):
+#...     chunk = commands[(x*2):(x*2+2)]
+#...     mode = chunk[0]
+#...     color = chunk[1]
+#...     print(mode, color)
+#... 
             
-
-
